@@ -36,7 +36,7 @@ public class CollectionViewShelfLayout: UICollectionViewLayout {
   /// A height of each section footer. Set this value to 0.0 if you don't want section footer views. Default is *0.0*
   @IBInspectable public var sectionFooterHeight: CGFloat = 0.0
   /// An inset around the cell area in each section inset from section header and footer view and the collection view's bounds. Default is *zero* on every sides.
-  @IBInspectable public var sectionCellInset: UIEdgeInsets = UIEdgeInsetsZero
+  @IBInspectable public var sectionCellInset: UIEdgeInsets = UIEdgeInsets.zero
   /// A size of each cells.
   @IBInspectable public var cellSize: CGSize = CGSize.zero
   /// Horizontal spacing between cells. Default value is *8.0*
@@ -48,23 +48,23 @@ public class CollectionViewShelfLayout: UICollectionViewLayout {
   @IBOutlet public var footerView: UIView?
   
   /// A boolean indicates that the layout is preparing for cell panning. This will be set to *true* when we invalidate layout by panning cells.
-  private var preparingForCellPanning = false
+  fileprivate var preparingForCellPanning = false
   
   public override init() {
     super.init()
-    registerClass(ShelfHeaderFooterView.self, forDecorationViewOfKind: ShelfElementKindCollectionHeader)
-    registerClass(ShelfHeaderFooterView.self, forDecorationViewOfKind: ShelfElementKindCollectionFooter)
+    register(ShelfHeaderFooterView.self, forDecorationViewOfKind: ShelfElementKindCollectionHeader)
+    register(ShelfHeaderFooterView.self, forDecorationViewOfKind: ShelfElementKindCollectionFooter)
   }
   
   required public init?(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
-    registerClass(ShelfHeaderFooterView.self, forDecorationViewOfKind: ShelfElementKindCollectionHeader)
-    registerClass(ShelfHeaderFooterView.self, forDecorationViewOfKind: ShelfElementKindCollectionFooter)
+    register(ShelfHeaderFooterView.self, forDecorationViewOfKind: ShelfElementKindCollectionHeader)
+    register(ShelfHeaderFooterView.self, forDecorationViewOfKind: ShelfElementKindCollectionFooter)
   }
   
-  public override func prepareLayout() {
+  public override func prepare() {
     defer {
-      super.prepareLayout()
+      super.prepare()
     }
     
     guard let collectionView = collectionView else {
@@ -91,19 +91,19 @@ public class CollectionViewShelfLayout: UICollectionViewLayout {
       let collectionBounds = collectionView.bounds
       let collectionViewWidth = collectionBounds.width
       if let headerView = headerView {
-        headerViewLayoutAttributes = CollectionViewShelfLayoutHeaderFooterViewLayoutAttributes(forDecorationViewOfKind: ShelfElementKindCollectionHeader, withIndexPath: NSIndexPath(index: 0))
+        headerViewLayoutAttributes = CollectionViewShelfLayoutHeaderFooterViewLayoutAttributes(forDecorationViewOfKind: ShelfElementKindCollectionHeader, with: IndexPath(index: 0))
         headerViewLayoutAttributes?.view = headerView
-        let headerViewSize = headerView.systemLayoutSizeFittingSize(CGSize(width: collectionViewWidth, height: 0.0), withHorizontalFittingPriority: UILayoutPriorityRequired, verticalFittingPriority: UILayoutPriorityFittingSizeLevel)
+        let headerViewSize = headerView.systemLayoutSizeFitting(CGSize(width: collectionViewWidth, height: 0.0), withHorizontalFittingPriority: UILayoutPriorityRequired, verticalFittingPriority: UILayoutPriorityFittingSizeLevel)
         headerViewLayoutAttributes?.size = headerViewSize
         headerViewLayoutAttributes?.frame = CGRect(origin: CGPoint(x: collectionBounds.minX, y: currentY), size: headerViewSize)
         currentY += headerViewSize.height
       }
       
-      let numberOfSections = collectionView.numberOfSections()
+      let numberOfSections = collectionView.numberOfSections
       for section in 0..<numberOfSections {
         let sectionMinY = currentY
         if sectionHeaderHeight > 0.0 {
-          let sectionHeaderAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: ShelfElementKindSectionHeader, withIndexPath: NSIndexPath(index: section))
+          let sectionHeaderAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: ShelfElementKindSectionHeader, with: IndexPath(index: section))
           sectionHeaderAttributes.frame = CGRect(
             origin: CGPoint(x: collectionBounds.minX, y: currentY),
             size: CGSize(width: collectionBounds.width, height: sectionHeaderHeight)
@@ -117,8 +117,8 @@ public class CollectionViewShelfLayout: UICollectionViewLayout {
         currentY += sectionCellInset.top
         let topSectionCellMinY = currentY
         var cellInSectionAttributes: [UICollectionViewLayoutAttributes] = []
-        for item in 0..<collectionView.numberOfItemsInSection(section) {
-          let cellAttributes = UICollectionViewLayoutAttributes(forCellWithIndexPath: NSIndexPath(forItem: item, inSection: section))
+        for item in 0..<collectionView.numberOfItems(inSection: section) {
+          let cellAttributes = UICollectionViewLayoutAttributes(forCellWith: IndexPath(item: item, section: section))
           cellAttributes.frame = CGRect(
             origin: CGPoint(x: currentCellX, y: currentY),
             size: cellSize
@@ -136,7 +136,7 @@ public class CollectionViewShelfLayout: UICollectionViewLayout {
         currentY += cellSize.height + sectionCellInset.bottom
         
         if sectionFooterHeight > 0.0 {
-          let sectionHeaderAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: ShelfElementKindSectionFooter, withIndexPath: NSIndexPath(index: section))
+          let sectionHeaderAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: ShelfElementKindSectionFooter, with: IndexPath(index: section))
           sectionHeaderAttributes.frame = CGRect(
             origin: CGPoint(x: collectionBounds.minX, y: currentY),
             size: CGSize(width: collectionBounds.width, height: sectionFooterHeight)
@@ -151,7 +151,7 @@ public class CollectionViewShelfLayout: UICollectionViewLayout {
         )
         sectionsFrame.append(sectionFrame)
         
-        let panningScrollView = TrackingScrollView(frame: CGRect(origin: CGPointZero, size: sectionFrame.size))
+        let panningScrollView = TrackingScrollView(frame: CGRect(origin: CGPoint.zero, size: sectionFrame.size))
         panningScrollView.delegate = self
         panningScrollView.trackingView = collectionView
         panningScrollView.trackingFrame = sectionCellFrame
@@ -159,9 +159,9 @@ public class CollectionViewShelfLayout: UICollectionViewLayout {
       }
       
       if let footerView = footerView {
-        footerViewLayoutAttributes = CollectionViewShelfLayoutHeaderFooterViewLayoutAttributes(forDecorationViewOfKind: ShelfElementKindCollectionFooter, withIndexPath: NSIndexPath(index: 0))
+        footerViewLayoutAttributes = CollectionViewShelfLayoutHeaderFooterViewLayoutAttributes(forDecorationViewOfKind: ShelfElementKindCollectionFooter, with: IndexPath(index: 0))
         footerViewLayoutAttributes?.view = footerView
-        let footerViewSize = footerView.systemLayoutSizeFittingSize(CGSize(width: collectionViewWidth, height: 0.0), withHorizontalFittingPriority: UILayoutPriorityRequired, verticalFittingPriority: UILayoutPriorityFittingSizeLevel)
+        let footerViewSize = footerView.systemLayoutSizeFitting(CGSize(width: collectionViewWidth, height: 0.0), withHorizontalFittingPriority: UILayoutPriorityRequired, verticalFittingPriority: UILayoutPriorityFittingSizeLevel)
         footerViewLayoutAttributes?.size = footerViewSize
         footerViewLayoutAttributes?.frame = CGRect(origin: CGPoint(x: collectionBounds.minX, y: currentY), size: footerViewSize)
         currentY += footerViewSize.height
@@ -169,12 +169,12 @@ public class CollectionViewShelfLayout: UICollectionViewLayout {
     }
   }
   
-  public override func collectionViewContentSize() -> CGSize {
+  public override var collectionViewContentSize: CGSize {
     guard let collectionView = collectionView else {
       return .zero
     }
     let width = collectionView.bounds.width
-    let numberOfSections = CGFloat(collectionView.numberOfSections())
+    let numberOfSections = CGFloat(collectionView.numberOfSections)
     
     let headerHeight = headerViewLayoutAttributes?.size.height ?? 0.0
     let footerHeight = footerViewLayoutAttributes?.size.height ?? 0.0
@@ -189,14 +189,14 @@ public class CollectionViewShelfLayout: UICollectionViewLayout {
     )
   }
   
-  public override func layoutAttributesForElementsInRect(rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
+  public override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
     let headerAndFooterAttributes: [UICollectionViewLayoutAttributes] = [ headerViewLayoutAttributes, footerViewLayoutAttributes ].flatMap({ $0 }).filter { (attributes) -> Bool in
       return rect.intersects(attributes.frame)
     }
     
-    let visibleSections = sectionsFrame.enumerate().filter({ (index: Int, element: CGRect) -> Bool in
+    let visibleSections = sectionsFrame.enumerated().filter({ (index: Int, element: CGRect) -> Bool in
       return rect.intersects(element)
-    }).map({ $0.index })
+    }).map({ $0.offset })
     
     let visibleAttributes = visibleSections.flatMap { (section) -> [UICollectionViewLayoutAttributes] in
       var attributes: [UICollectionViewLayoutAttributes] = []
@@ -226,11 +226,11 @@ public class CollectionViewShelfLayout: UICollectionViewLayout {
     return visibleAttributes + headerAndFooterAttributes
   }
   
-  public override func layoutAttributesForItemAtIndexPath(indexPath: NSIndexPath) -> UICollectionViewLayoutAttributes? {
+  public override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
     return cellsLayoutAttributes[indexPath.section][indexPath.row]
   }
   
-  public override func layoutAttributesForDecorationViewOfKind(elementKind: String, atIndexPath indexPath: NSIndexPath) -> UICollectionViewLayoutAttributes? {
+  public override func layoutAttributesForDecorationView(ofKind elementKind: String, at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
     switch elementKind {
     case ShelfElementKindCollectionHeader:
       return headerViewLayoutAttributes
@@ -241,7 +241,7 @@ public class CollectionViewShelfLayout: UICollectionViewLayout {
     }
   }
   
-  public override func layoutAttributesForSupplementaryViewOfKind(elementKind: String, atIndexPath indexPath: NSIndexPath) -> UICollectionViewLayoutAttributes? {
+  public override func layoutAttributesForSupplementaryView(ofKind elementKind: String, at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
     switch elementKind {
     case ShelfElementKindSectionHeader:
       return sectionHeaderViewsLayoutAttributes[indexPath.section]
@@ -252,13 +252,13 @@ public class CollectionViewShelfLayout: UICollectionViewLayout {
     }
   }
   
-  public override func invalidateLayoutWithContext(context: UICollectionViewLayoutInvalidationContext) {
+  public override func invalidateLayout(with context: UICollectionViewLayoutInvalidationContext) {
     if let context = context as? CollectionViewShelfLayoutInvalidationContext,
       let panningInformation = context.panningScrollView,
-      let indexOfPanningScrollView = cellPanningScrollViews.indexOf(panningInformation) {
+      let indexOfPanningScrollView = cellPanningScrollViews.index(of: panningInformation) {
       
       let panningCellsAttributes = cellsLayoutAttributes[indexOfPanningScrollView]
-      let minX = panningCellsAttributes.reduce(CGFloat.max, combine: { (currentX, attributes) in
+      let minX = panningCellsAttributes.reduce(CGFloat.greatestFiniteMagnitude, { (currentX, attributes) in
         return min(currentX, attributes.frame.minX)
       }) - sectionCellInset.left
       
@@ -267,16 +267,16 @@ public class CollectionViewShelfLayout: UICollectionViewLayout {
       // UICollectionViewLayout will not guarantee to call prepareLayout on every invalidation.
       // So we do the panning cell translation in the invalidate layout so that we can guarantee that every panning will be accounted.
       panningCellsAttributes.forEach({ (attributes) in
-        attributes.frame.offsetInPlace(dx: offset, dy: 0.0)
+        attributes.frame = attributes.frame.offsetBy(dx: offset, dy: 0.0)
       })
       
       self.preparingForCellPanning = true
     }
     
-    super.invalidateLayoutWithContext(context)
+    super.invalidateLayout(with: context)
   }
   
-  public override class func invalidationContextClass() -> AnyClass {
+  public override class var invalidationContextClass: AnyClass {
     return CollectionViewShelfLayoutInvalidationContext.self
   }
 }
@@ -285,7 +285,7 @@ public class CollectionViewShelfLayout: UICollectionViewLayout {
 // MARK: - UIScrollViewDelegate methods
 
 extension CollectionViewShelfLayout: UIScrollViewDelegate {
-  public func scrollViewDidScroll(scrollView: UIScrollView) {
+  public func scrollViewDidScroll(_ scrollView: UIScrollView) {
     // Because we tell Collection View that it has its width of the content size equals to its width of its frame (and bounds).
     // This means that we can use its pan gesture recognizer to scroll our cells
     // Our hack is to use a scroll view per section, steal that scroll view's pan gesture recognizer and add it to collection view.
@@ -293,7 +293,7 @@ extension CollectionViewShelfLayout: UIScrollViewDelegate {
     guard let trackingScrollView = scrollView as? TrackingScrollView else { return }
     
     let context = CollectionViewShelfLayoutInvalidationContext(panningScrollView: trackingScrollView)
-    invalidateLayoutWithContext(context)
+    invalidateLayout(with: context)
   }
 }
 
@@ -304,7 +304,7 @@ private class CollectionViewShelfLayoutHeaderFooterViewLayoutAttributes: UIColle
 }
 
 private class CollectionViewShelfLayoutInvalidationContext: UICollectionViewLayoutInvalidationContext {
-  private let panningScrollView: TrackingScrollView?
+  fileprivate let panningScrollView: TrackingScrollView?
   
   override private var invalidateEverything: Bool {
     if panningScrollView == nil {
@@ -344,19 +344,19 @@ private class ShelfHeaderFooterView: UICollectionReusableView {
     didSet {
       if let view = view {
         addSubview(view)
-        view.topAnchor.constraintEqualToAnchor(topAnchor).active = true
-        view.bottomAnchor.constraintEqualToAnchor(bottomAnchor).active = true
-        view.leadingAnchor.constraintEqualToAnchor(leadingAnchor).active = true
-        view.trailingAnchor.constraintEqualToAnchor(trailingAnchor).active = true
+        view.topAnchor.constraint(equalTo: topAnchor).isActive = true
+        view.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+        view.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
+        view.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
       }
     }
   }
   
-  private override func applyLayoutAttributes(layoutAttributes: UICollectionViewLayoutAttributes) {
+  private override func apply(_ layoutAttributes: UICollectionViewLayoutAttributes) {
     if let layoutAttributes = layoutAttributes as? CollectionViewShelfLayoutHeaderFooterViewLayoutAttributes {
       view = layoutAttributes.view
     }
-    super.applyLayoutAttributes(layoutAttributes)
+    super.apply(layoutAttributes)
   }
 }
 
@@ -378,42 +378,42 @@ private class TrackingScrollView: UIScrollView {
   
   override init(frame: CGRect) {
     super.init(frame: frame)
-    layer.contents = UIImage().CGImage
+    layer.contents = UIImage().cgImage
     panGestureRecognizer.maximumNumberOfTouches = 1
   }
   
   required init?(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
-    layer.contents = UIImage().CGImage
+    layer.contents = UIImage().cgImage
     panGestureRecognizer.maximumNumberOfTouches = 1
   }
   
-  @objc private override func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
-    guard let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer where panGestureRecognizer === self.panGestureRecognizer else {
+  @objc private override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+    guard let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer, panGestureRecognizer === self.panGestureRecognizer else {
       return false
     }
     
-    let positionInTrackingView = panGestureRecognizer.locationInView(trackingView)
+    let positionInTrackingView = panGestureRecognizer.location(in: trackingView)
     return trackingFrame.contains(positionInTrackingView)
   }
   
-  @objc private func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-    guard let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer where panGestureRecognizer === self.panGestureRecognizer else {
+  @objc private func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+    guard let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer, panGestureRecognizer === self.panGestureRecognizer else {
       return false
     }
-    guard let otherPanGestureRecognizer = otherGestureRecognizer as? UIPanGestureRecognizer where otherPanGestureRecognizer.delegate is TrackingScrollView && otherPanGestureRecognizer.view === trackingView else {
+    guard let otherPanGestureRecognizer = otherGestureRecognizer as? UIPanGestureRecognizer, otherPanGestureRecognizer.delegate is TrackingScrollView && otherPanGestureRecognizer.view === trackingView else {
       return false
     }
     
     return true
   }
   
-  @objc private func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldReceiveTouch touch: UITouch) -> Bool {
-    guard let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer where self.panGestureRecognizer === panGestureRecognizer else {
+  @objc private func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceiveTouch touch: UITouch) -> Bool {
+    guard let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer, self.panGestureRecognizer === panGestureRecognizer else {
       return false
     }
     
-    let positionInTrackingView = touch.locationInView(trackingView)
+    let positionInTrackingView = touch.location(in: trackingView)
     return trackingFrame.contains(positionInTrackingView)
   }
 }
